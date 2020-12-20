@@ -71,10 +71,12 @@ namespace TTT{
 		}
 	}
 	int DrawTable(int player, int x, int y){
+		
+		if(x > Game.Size || y > Game.Size || x < 1 || y < 1)
+			return 2; //x/y out of range
+
 		if(Game.Table[y-1][x-1])
 			return 3; //the cell is occupied
-		if(Game.Size < x || Game.Size < y || x < 1 || y < 1)
-			return 2; //x/y out of range
 
 		switch(player){
 		case 1:
@@ -89,6 +91,7 @@ namespace TTT{
 		return 0;
 	}
 	void PrintGame(){
+		system("cls");
 		printf("  ");
 		for(int i=1;i<=Game.Size;i++)
 			printf("%d ",i);					//  1 2 3 4 5
@@ -103,9 +106,9 @@ namespace TTT{
 				if(!Game.Table[y][x])
 					temp = ' ';
 				else if(Game.Table[y][x] == 1)
-					temp = 'O';
-				else if(Game.Table[y][x] == 2)
 					temp = 'X';
+				else if(Game.Table[y][x] == 2)
+					temp = 'O';
 				printf("%c|",temp);				//a|X|O|X|O|X|
 			}
 			printf("\n  ");
@@ -115,4 +118,96 @@ namespace TTT{
 		}
 
 	}
+	int GetWinner(){
+		int Winner = -1; //-1 is equal as draw
+		for(int i = 0;i<Game.Size;i++)
+			for(int j = 0;j<Game.Size;j++)
+				if(!Game.Table[i][j]){
+					Winner = 0;
+					break;
+				}
+
+		if(Winner == -1)
+			return 3; //draw
+
+		switch(Game.Size){
+		case 3:
+		{
+			// check "\"
+			if(Game.Table[0][0] == Game.Table[1][1] && Game.Table[1][1] == Game.Table[2][2])
+				return Game.Table[1][1];
+
+			// check "/"
+			if(Game.Table[2][0] == Game.Table[1][1] && Game.Table[2][0] == Game.Table[1][1])
+				return Game.Table[1][1];
+
+			// check "|"
+			for(int i=0;i<Game.Size;i++)
+				if(Game.Table[0][i] == Game.Table[1][i] && Game.Table[1][i] == Game.Table[2][i])
+					if(Game.Table[1][i])
+						return Game.Table[1][i];
+
+			// check "-"
+			for(int i=0;i<Game.Size;i++)
+				if(Game.Table[i][1] == Game.Table[i][0] && Game.Table[i][1] == Game.Table[i][2])
+					if(Game.Table[i][1])
+						return Game.Table[i][1];
+			break;
+		}
+		case 5:
+		case 7:
+		{
+			// check "\"
+			for(int y = 0 ; y<=Game.Size-Game.WinLen ; y++){
+				for(int x = 0 ; x<=Game.Size-Game.WinLen ; x++){
+					int beingChecked = Game.Table[y][x];
+					for(int i = 0; i<Game.WinLen; i++)
+						if(Game.Table[y+i][x+i] != beingChecked)
+							beingChecked = 0;
+					if(beingChecked)
+						return beingChecked;
+				}
+			}
+
+			// check "/"
+			for(int y = 0 ; y<=Game.Size-Game.WinLen ; y++){
+				for(int x = Game.Size-1 ; x>=Game.WinLen-1 ; x--){
+					int beingChecked = Game.Table[y][x];
+					for(int i = 0; i<Game.WinLen; i++)
+						if(Game.Table[y+i][x-i] != beingChecked)
+							beingChecked = 0;
+					if(beingChecked)
+						return beingChecked;
+				}
+			}
+
+			// check "|"
+			for(int y = 0 ; y<=Game.Size-Game.WinLen ; y++){
+				for(int x = 0 ; x<Game.Size ; x++){
+					int beingChecked = Game.Table[y][x];
+					for(int i = 0; i<Game.WinLen; i++)
+						if(Game.Table[y+i][x] != beingChecked)
+							beingChecked = 0;
+					if(beingChecked)
+						return beingChecked;
+				}
+			}
+
+			// check "-"
+			for(int y = 0 ; y<Game.Size ; y++){
+				for(int x = 0 ; x<=Game.Size-Game.WinLen ; x++){
+					int beingChecked = Game.Table[y][x];
+					for(int i = 0; i<Game.WinLen; i++)
+						if(Game.Table[y][x+i] != beingChecked)
+							beingChecked = 0;
+					if(beingChecked)
+						return beingChecked;
+				}
+			}
+			break;
+		}
+		}
+		return 0;
+	}
+
 }
