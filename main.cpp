@@ -40,23 +40,69 @@ void GameMaking(){
 	TTT::CreateGame(size,vs_bot); //buat tabel, dan ukurannya
 }
 
+bool ConvertInput(char* x, char* y){
+	if(*x >= 0x30 && *x <= 0x39){
+		*x -= 0x30;
+		if(*y >= 0x61 && *y <= 0x7A){
+			*y -= 0x60;
+			return true;
+		}
+		else if(*y >= 0x41 && *y <= 0x5A){
+			*y -= 0x0;
+			return true;
+		}
+	}
+	return false;
+}
+
+char errorstr[255] = {};
+
+bool GetInput(int num_player){
+	char strinput[2];
+	printf("%sInput untuk %s = ",errorstr,TTT::GetUsername(num_player));
+	errorstr[0] = 0;
+
+	fgets(strinput,3,stdin);
+	fflush(stdin);
+
+	if(ConvertInput(&strinput[0],&strinput[1])){
+		int res_draw = TTT::DrawTable(num_player,strinput[0],strinput[1]);
+		switch(res_draw){ //gambar X atau O di posisi (x,y)
+		case 2:
+			strcpy(errorstr,"Error = Out of Table. Try Again!\n");
+			return false;
+		case 3:
+			strcpy(errorstr,"Error = Table is occupied. Try Again!\n");
+			return false;
+		}
+	}
+	else {
+		strcpy(errorstr,"Error = Invalid Input. Try Again!\n");
+		return false;
+	}
+	return true;
+}
+
 int main(){
-	
+	int turn = 1;
 	GameMaking();
 
 	while(1){
-		int x,y;
+		
+		
 		TTT::PrintGame(); //nampilin tabel
-		printf("input untuk %s di x,y = ",TTT::GetUsername(1));
-		scanf("%d,%d",&x,&y);
-		if(TTT::DrawTable(1,x,y)){ //gambar X atau O di posisi (x,y)
-			printf("\noccupied");
-			system("pause");
+		if(GetInput(turn)){
+			if(turn == 1)
+				turn = 2;
+			else
+				turn = 1;
 		}
+
+
 		int Winner = TTT::GetWinner();
 		if(Winner){
 			TTT::PrintGame(); //nampilin tabel
-			if(Winner == -1){
+			if(Winner == 3){
 				printf("\nThe game is Draw!\n");
 				system("pause");
 				break;

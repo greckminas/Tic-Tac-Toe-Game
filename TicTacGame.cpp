@@ -9,6 +9,10 @@ namespace TTT{
 		struct Player{
 			char name[255];
 			bool isBot;
+			struct Move{
+				int x;
+				int y;
+			}LastMove;
 		}Player1,Player2;
 		int** Table;
 	}Game;
@@ -80,9 +84,13 @@ namespace TTT{
 
 		switch(player){
 		case 1:
+			Game.Player1.LastMove.x = x;
+			Game.Player1.LastMove.y = y;
 			Game.Table[y-1][x-1] = 1;
 			break;
 		case 2:
+			Game.Player2.LastMove.x = x;
+			Game.Player2.LastMove.y = y;
 			Game.Table[y-1][x-1] = 2;
 			break;
 		default:
@@ -135,11 +143,13 @@ namespace TTT{
 		{
 			// check "\"
 			if(Game.Table[0][0] == Game.Table[1][1] && Game.Table[1][1] == Game.Table[2][2])
-				return Game.Table[1][1];
+				if(Game.Table[1][1])
+					return Game.Table[1][1];
 
 			// check "/"
 			if(Game.Table[2][0] == Game.Table[1][1] && Game.Table[2][0] == Game.Table[1][1])
-				return Game.Table[1][1];
+				if(Game.Table[1][1])
+					return Game.Table[1][1];
 
 			// check "|"
 			for(int i=0;i<Game.Size;i++)
@@ -209,5 +219,28 @@ namespace TTT{
 		}
 		return 0;
 	}
-
+	int GetLastMove(int num_player, int* x, int* y){
+		if(!*x || !*y)
+			return 2; //invalid move
+		switch(num_player){
+		case 1:
+			*x = Game.Player1.LastMove.x;
+			*y = Game.Player1.LastMove.y;
+			return 0;
+		case 2:
+			*x = Game.Player2.LastMove.x;
+			*y = Game.Player2.LastMove.y;
+			return 0;
+		default:
+			return 1;//abnormal num_player
+		}
+	}
+	bool isPlayerBot(int num_player){
+		switch(num_player){
+		case 1:
+			return Game.Player1.isBot;
+		case 2:
+			return Game.Player2.isBot;
+		}
+	}
 }

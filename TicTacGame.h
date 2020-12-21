@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 namespace TTT{
 	int CreateGame(int size, bool versus_bot);
@@ -8,4 +9,6 @@ namespace TTT{
 	int DrawTable(int player, int x, int y);
 	int GetWinner();
 	void PrintGame();
+	int GetLastMove(int num_player, int* x, int* y);
+	bool isPlayerBot(int num_player);
 }
