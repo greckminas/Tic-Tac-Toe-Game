@@ -86,18 +86,18 @@ bool GetInput(int num_player){
 int main(){
 	int turn = 1;
 	GameMaking();
-
+	BOT::initBot();
 	while(1){
-		
-		
+	
 		TTT::PrintGame(); //nampilin tabel
-		if(GetInput(turn)){
-			if(turn == 1)
-				turn = 2;
-			else
-				turn = 1;
+				
+		if(turn == 1){
+			if(GetInput(turn))
+					turn = 2;
+		}else if(turn == 2){
+			while(BOT::CheckMove());
+			turn = 1;
 		}
-
 
 		int Winner = TTT::GetWinner();
 		if(Winner){
@@ -112,5 +112,7 @@ int main(){
 			break;
 		}
 	}
+	system("pause");
+	system("pause");
 	return 0;
 }
