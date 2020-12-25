@@ -34,3 +34,7 @@ I Created a function to handle the input and its error. And as you can see, the 
 23 December 2020<br />
 ![Testing Bot Movement](img-progress/23-des-2020-1.png)<br />
 I Created and tested bot movement. It reads possibilities until next 3 steps.<br />
+
+26 December 2020<br />
+I fixed bot movement and some functions<br />
+psst.. I think bot thinking should has timeout interval.

@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <ctime>
+#include <cmath>
 
 namespace TTT{
 	int CreateGame(int size, bool versus_bot);
@@ -17,5 +18,5 @@ namespace TTT{
 namespace BOT{
 	void initBot();
 	int CheckMove();
-
+	int GetMoveBot();
 }

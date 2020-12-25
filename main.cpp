@@ -1,6 +1,6 @@
 #include "TicTacGame.h"
 
-void GameMaking(){
+void GameMaking(int* turn){
 	bool vs_bot = false;
 	int size = 0;
 	char p1[255] = {};
@@ -11,7 +11,7 @@ void GameMaking(){
 		printf("Selamat Datang di Tic Tac Toe Game Sederhana!\n");
 		if(size != 3 && size != 5 && size != 7){
 			printf("Pilih ukuran [3/5/7] = ");
-			scanf("%d",&size);
+			scanf_s("%d",&size);
 			if(size != 3 && size != 5 && size != 7)
 				continue;
 		} else 
@@ -36,7 +36,21 @@ void GameMaking(){
 		printf("Masukkan Nama Player 2 = ");
 		scanf("\n%[^\n]%*c",p2);
 		TTT::SetUsername(2,p2);
+	} else {
+		TTT::SetUsername(2,"Bot");
 	}
+	while(1){
+		system("cls");
+		printf("Selamat Datang di Tic Tac Toe Game Sederhana!\n");
+		printf("Pilih ukuran [3/5/7] = %d\n",size);
+		printf("Siapa giliran pertama ?\n1. %s\n2. %s\n[1/2] = ",TTT::GetUsername(1),TTT::GetUsername(2));
+		scanf_s("%d",turn);
+		if(*turn != 1 && *turn != 2)
+			continue;
+		break;
+
+	}
+	fflush(stdin);
 	TTT::CreateGame(size,vs_bot); //buat tabel, dan ukurannya
 }
 
@@ -83,9 +97,15 @@ bool GetInput(int num_player){
 	return true;
 }
 
+bool Wait(int sec){
+	clock_t start = clock();
+	while(clock()-start < sec*1000);
+	return true;
+}
+
 int main(){
-	int turn = 1;
-	GameMaking();
+	int turn = 0;
+	GameMaking(&turn);
 	BOT::initBot();
 	while(1){
 	
@@ -95,7 +115,10 @@ int main(){
 			if(GetInput(turn))
 					turn = 2;
 		}else if(turn == 2){
-			while(BOT::CheckMove());
+			if(TTT::isPlayerBot(2))
+				while(BOT::GetMoveBot());
+			else
+				while(!GetInput(turn));
 			turn = 1;
 		}
 

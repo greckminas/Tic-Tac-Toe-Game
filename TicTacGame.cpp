@@ -255,6 +255,8 @@ namespace BOT{
 		int** isEmpty;
 		int** Table;
 		int** TableScore;
+		int** StepTable;
+		int** WinTable;
 		int countEmpty;
 		struct point{
 			int x;
@@ -267,14 +269,20 @@ namespace BOT{
 		int** table = new int*[TTT::Game.Size];
 		int** table1 = new int*[TTT::Game.Size];
 		int** table2 = new int*[TTT::Game.Size];
+		int** table3 = new int*[TTT::Game.Size];
+		int** table4 = new int*[TTT::Game.Size];
 		for(int i = 0; i < TTT::Game.Size; ++i){
 			table[i] = new int[TTT::Game.Size];
 			table1[i] = new int[TTT::Game.Size];
 			table2[i] = new int[TTT::Game.Size];
+			table3[i] = new int[TTT::Game.Size];
+			table4[i] = new int[TTT::Game.Size];
 		}
 		board.isEmpty = table;
 		board.Table = table1;
 		board.TableScore = table2;
+		board.StepTable = table3;
+		board.WinTable = table4;
 		board.Size = TTT::Game.Size;
 		board.WinLen = TTT::Game.WinLen;
 		
@@ -364,6 +372,124 @@ namespace BOT{
 		}
 		return 0;
 	}
+	
+	int GetBestMove(BOT::Data &board, int num_player, int steps){
+
+		for(int y = 0; y<board.Size; y++){
+			for(int x = 0; x<board.Size; x++){
+				if(board.isEmpty[y][x] == 1){
+					board.Table[y][x] = num_player;
+					board.isEmpty[y][x] = 2;
+					int Winner = CheckWinner(board);
+
+					if(Winner==num_player){
+						int score = steps*board.Size*board.Size;
+						if(!board.WinTable[y][x] || board.WinTable[y][x] > score){
+							board.WinTable[y][x] = score;
+						} 
+					} else {
+						if (steps <= TTT::Game.Difficulty){
+							int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1);
+						}
+					}
+
+					//if(Winner==2){
+					//	//board.BestMove.x = x;
+					//	//board.BestMove.y = y;
+					//	board.TableScore[y][x] += 10*(TTT::Game.Difficulty-steps); //menang
+					//	return 2;
+					//}else if(Winner==1){
+					//	//board.BestMove.x = x;
+					//	//board.BestMove.y = y;
+					//	board.TableScore[y][x] += 10*(TTT::Game.Difficulty-steps); //kalah
+					//	//return 1;
+					//} else {
+					//	if (steps < TTT::Game.Difficulty){
+					//		int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1);
+					//		//if(res)
+					//		//	return res;
+					//	}
+					//}
+
+					board.Table[y][x] = 0;
+					board.isEmpty[y][x] = 1;
+				}
+			}
+		}
+		return 0;
+	}
+
+	
+	int GetMoveBot(){
+		board.BestScore = -1;
+		board.countEmpty = 0;
+		for(int i = 0; i<board.Size; i++){
+			for(int j = 0; j<board.Size; j++){
+				if(!TTT::Game.Table[j][i]){
+					board.countEmpty++;
+				}
+			}
+		}
+		
+		for(int y = 0; y<board.Size; y++){
+			for(int x = 0; x<board.Size; x++){
+				board.Table[y][x] = TTT::Game.Table[y][x];
+				board.isEmpty[y][x] = 0;
+				board.TableScore[y][x] = 0;
+				board.WinTable[y][x] = 0;
+				board.StepTable[y][x] = 0;
+			}
+		}
+		
+		for(int i = 0; i<board.Size; i++){
+			for(int j = 0; j<board.Size; j++){
+				if(!board.Table[j][i] && board.isEmpty[j][i] != 2){
+					board.isEmpty[j][i] = 1;
+				} else {
+					board.isEmpty[j][i] = 0;
+					board.WinTable[j][i] = 0x7FFFFFFF;
+				}
+			}
+		}
+		TTT::Game.Difficulty = 4;
+		GetBestMove(board,2,1);
+			
+		srand(time(NULL));
+		int MinScore = 0x7FFFFFFF;
+		for(int y = 0; y<board.Size; y++){
+			for(int x = 0; x<board.Size; x++){
+				//printf("%016d ",board.WinTable[y][x]);
+				if(MinScore > board.WinTable[y][x] && board.WinTable[y][x]){
+					MinScore = board.WinTable[y][x];
+				}
+			}
+			//printf("\n");
+		}
+		if(MinScore == 0x7FFFFFFF)
+			MinScore = 0;
+
+		//printf("\n%016d\n",MinScore);
+		//system("pause");
+
+		while(1){
+			int x_rand = rand() % board.Size;
+			int y_rand = rand() % board.Size;
+			if(board.WinTable[y_rand][x_rand] == MinScore){
+				board.BestMove.x = x_rand;
+				board.BestMove.y = y_rand;
+				break;
+			}
+		}
+		
+		
+		if(TTT::DrawTable(2,board.BestMove.x+1,board.BestMove.y+1))
+			return 1;
+		//end of CheckMove
+		return 0;
+
+	}
+
+
 
 
 	int CheckMove(){
