@@ -11,7 +11,7 @@
 6. ~~Create "Turn" function~~ (22 December 2020)
 7. ~~Create Bot Movement~~ (23 December 2020)
 8. Make some difficulties
-9. Add input timeout
+9. ~~Add input timeout~~ (27 December 2020)
 10. Add powerups ?
 
 **(WORK IN PROGRESS)**
@@ -37,4 +37,8 @@ I Created and tested bot movement. It reads possibilities until next 3 steps.<br
 
 26 December 2020<br />
 I fixed bot movement and some functions<br />
-psst.. I think bot thinking should has timeout interval.
+psst.. I think bot thinking should has timeout interval.<br />
+
+27 December 2020<br />
+![Testing timeout interval](img-progress/27-des-2020-1.png)<br />
+I Created and tested timeout interval. And of course bot movement has timeout interval too.<br />

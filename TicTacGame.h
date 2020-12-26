@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -13,10 +14,13 @@ namespace TTT{
 	void PrintGame();
 	int GetLastMove(int num_player, int* x, int* y);
 	bool isPlayerBot(int num_player);
+	int GetCountTurn();
+	void SetTimeout(bool timeout);
+	bool GetTimeout();
+	bool DrawRandom(int num_player);
 }
 
 namespace BOT{
 	void initBot();
-	int CheckMove();
 	int GetMoveBot();
 }

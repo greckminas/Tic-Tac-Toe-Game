@@ -6,6 +6,8 @@ namespace TTT{
 		int Size;
 		int WinLen;
 		int Difficulty;
+		int CountTurn;
+		bool isTimeout;
 		struct Player{
 			char name[255];
 			bool isBot;
@@ -48,6 +50,7 @@ namespace TTT{
 			strcpy_s(Game.Player2.name,"Bot");
 
 		}
+		Game.CountTurn = 0;
 		return 0; //nothing error
 	}
 	int SetUsername(int num_player, char* name){
@@ -98,6 +101,8 @@ namespace TTT{
 		default:
 			return 1; //abnormal num_player
 		}
+		SetTimeout(false);
+		Game.CountTurn++;
 		return 0;
 	}
 	void PrintGame(){
@@ -244,7 +249,33 @@ namespace TTT{
 		case 2:
 			return Game.Player2.isBot;
 		}
+		return 0;
 	}
+	int GetCountTurn(){
+		return Game.CountTurn;
+	}
+	void SetTimeout(bool timeout){
+		Game.isTimeout = timeout;
+	}
+	bool GetTimeout(){
+		return Game.isTimeout;
+	}
+	bool DrawRandom(int num_player){
+		if(num_player != 1 && num_player != 2)
+			return false; //error
+
+		srand((unsigned int)time(NULL));
+		while(1){
+			int x_rand = rand() % Game.Size;
+			int y_rand = rand() % Game.Size;
+			if(!Game.Table[y_rand][x_rand]){
+				DrawTable(num_player,x_rand+1,y_rand+1);
+				break;
+			}
+		}
+		return true;
+	}
+
 }
 
 namespace BOT{
@@ -268,27 +299,26 @@ namespace BOT{
 	void initBot(){
 		int** table = new int*[TTT::Game.Size];
 		int** table1 = new int*[TTT::Game.Size];
-		int** table2 = new int*[TTT::Game.Size];
-		int** table3 = new int*[TTT::Game.Size];
+		//int** table2 = new int*[TTT::Game.Size];
+		//int** table3 = new int*[TTT::Game.Size];
 		int** table4 = new int*[TTT::Game.Size];
 		for(int i = 0; i < TTT::Game.Size; ++i){
 			table[i] = new int[TTT::Game.Size];
 			table1[i] = new int[TTT::Game.Size];
-			table2[i] = new int[TTT::Game.Size];
-			table3[i] = new int[TTT::Game.Size];
+			//table2[i] = new int[TTT::Game.Size];
+			//table3[i] = new int[TTT::Game.Size];
 			table4[i] = new int[TTT::Game.Size];
 		}
 		board.isEmpty = table;
 		board.Table = table1;
-		board.TableScore = table2;
-		board.StepTable = table3;
+		//board.TableScore = table2;
+		//board.StepTable = table3;
 		board.WinTable = table4;
 		board.Size = TTT::Game.Size;
 		board.WinLen = TTT::Game.WinLen;
 		
 
 	}
-
 
 	int CheckWinner(BOT::Data board){
 		switch(board.Size){
@@ -374,7 +404,7 @@ namespace BOT{
 	}
 	
 	int GetBestMove(BOT::Data &board, int num_player, int steps){
-
+		
 		for(int y = 0; y<board.Size; y++){
 			for(int x = 0; x<board.Size; x++){
 				if(board.isEmpty[y][x] == 1){
@@ -386,10 +416,12 @@ namespace BOT{
 						int score = steps*board.Size*board.Size;
 						if(!board.WinTable[y][x] || board.WinTable[y][x] > score){
 							board.WinTable[y][x] = score;
-						} 
+						} else {
+							//board.WinTable[y][x] -= TTT::Game.Difficulty-steps+1;
+						}
 					} else {
-						if (steps <= TTT::Game.Difficulty){
-							int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1);
+						if (steps <= TTT::Game.Difficulty && !TTT::GetTimeout()){
+							int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1); 
 						}
 					}
 
@@ -419,7 +451,6 @@ namespace BOT{
 		return 0;
 	}
 
-	
 	int GetMoveBot(){
 		board.BestScore = -1;
 		board.countEmpty = 0;
@@ -435,9 +466,9 @@ namespace BOT{
 			for(int x = 0; x<board.Size; x++){
 				board.Table[y][x] = TTT::Game.Table[y][x];
 				board.isEmpty[y][x] = 0;
-				board.TableScore[y][x] = 0;
+				//board.TableScore[y][x] = 0;
 				board.WinTable[y][x] = 0;
-				board.StepTable[y][x] = 0;
+				//board.StepTable[y][x] = 0;
 			}
 		}
 		
@@ -454,7 +485,7 @@ namespace BOT{
 		TTT::Game.Difficulty = 4;
 		GetBestMove(board,2,1);
 			
-		srand(time(NULL));
+		srand((unsigned int)time(NULL));
 		int MinScore = 0x7FFFFFFF;
 		for(int y = 0; y<board.Size; y++){
 			for(int x = 0; x<board.Size; x++){
@@ -481,161 +512,6 @@ namespace BOT{
 			}
 		}
 		
-		
-		if(TTT::DrawTable(2,board.BestMove.x+1,board.BestMove.y+1))
-			return 1;
-		//end of CheckMove
-		return 0;
-
-	}
-
-
-
-
-	int CheckMove(){
-		board.BestScore = -1;
-		board.countEmpty = 0;
-		for(int i = 0; i<board.Size; i++){
-			for(int j = 0; j<board.Size; j++){
-				if(!TTT::Game.Table[j][i]){
-					board.countEmpty++;
-				}
-			}
-		}
-		
-		for(int y = 0; y<board.Size; y++){
-			for(int x = 0; x<board.Size; x++){
-				board.Table[y][x] = TTT::Game.Table[y][x];
-				board.isEmpty[y][x] = 0;
-				board.TableScore[y][x] = 0;
-			}
-		}
-		
-		for(int i = 0; i<board.Size; i++){
-			for(int j = 0; j<board.Size; j++){
-				if(!board.Table[j][i] && board.isEmpty[j][i] != 2){
-					board.isEmpty[j][i] = 1;
-				} else {
-					board.isEmpty[j][i] = 0;
-					board.TableScore[j][i] = 0x80000000;
-				}
-			}
-		}
-
-		for(int y = 0; y<board.Size; y++){
-			for(int x = 0; x<board.Size; x++){
-				if(board.isEmpty[y][x] == 1){
-					board.Table[y][x] = 2;
-					board.isEmpty[y][x] = 2;
-					int Winner = CheckWinner(board);
-					int Score=0;
-					if(Winner==2){
-						Score = 0xFFFF; // menang
-					} else {
-						for(int y1 = 0; y1<board.Size; y1++){
-							for(int x1 = 0; x1<board.Size; x1++){
-								if(board.isEmpty[y1][x1] == 1){
-									board.Table[y1][x1] = 1;
-									board.isEmpty[y1][x1] = 2;
-									int Winner1 = CheckWinner(board);
-									if(Winner1==1){
-										Score -= board.Size^3 ; //kalah
-									} else {
-										for(int y2 = 0; y2<board.Size; y2++){
-											for(int x2 = 0; x2<board.Size; x2++){
-												if(board.isEmpty[y2][x2] == 1){
-													board.Table[y2][x2] = 2;
-													board.isEmpty[y2][x2] = 2;
-													int Winner2 = CheckWinner(board);
-													if(Winner2==2){
-														Score += board.Size^2 ; //kemungkinan menang
-													} else {
-														for(int y3 = 0; y3<board.Size; y3++){
-															for(int x3 = 0; x3<board.Size; x3++){
-																if(board.isEmpty[y3][x3] == 1){
-																	board.Table[y3][x3] = 1;
-																	board.isEmpty[y3][x3] = 2;
-																	int Winner3 = CheckWinner(board);
-																	if(Winner3==1){
-																		Score -= board.Size ; //kemungkinan kalah
-																	} else {
-																		for(int y4 = 0; y4<board.Size; y4++){
-																			for(int x4 = 0; x4<board.Size; x4++){
-																				if(board.isEmpty[y4][x4] == 1){
-																					board.Table[y4][x4] = 1;
-																					board.isEmpty[y4][x4] = 2;
-																					int Winner4 = CheckWinner(board);
-																					if(Winner4==1){
-																						Score -= 1 ; //kemungkinan menang
-																					} else {
-																					}
-																					board.Table[y4][x4] = 0;
-																					board.isEmpty[y4][x4] = 1;
-																				}
-																			}
-																		}
-																	}
-																	board.Table[y3][x3] = 0;
-																	board.isEmpty[y3][x3] = 1;
-																}
-															}
-														}
-													}
-													board.Table[y2][x2] = 0;
-													board.isEmpty[y2][x2] = 1;
-												}
-											}
-										}
-									}
-									//if(board.TableScore[y][x] < Score)
-									//	board.TableScore[y][x] = Score;
-									/*if(board.BestScore < Score)
-										board.BestScore = Score;
-										board.BestMove.x = x;
-										board.BestMove.y = y;
-									}*/
-									board.Table[y1][x1] = 0;
-									board.isEmpty[y1][x1] = 1;
-								}
-							}
-						}
-					}
-					//if(board.TableScore[y][x] < Score)
-					board.TableScore[y][x] = Score;
-					/*if(board.BestScore < Score){
-						board.BestScore = Score;
-						board.BestMove.x = x1;
-						board.BestMove.y = y1;
-					}*/
-					board.Table[y][x] = 0;
-					board.isEmpty[y][x] = 1;
-				}
-			}
-		}
-
-		srand(time(NULL));
-		int MaxScore = 0x80000000;
-		for(int y = 0; y<board.Size; y++){
-			for(int x = 0; x<board.Size; x++){
-				printf("%016d ",board.TableScore[y][x]);
-				if(MaxScore < board.TableScore[y][x]){
-					MaxScore = board.TableScore[y][x];
-				}
-			}
-			printf("\n");
-		}
-		printf("\n%016d\n",MaxScore);
-		system("pause");
-
-		while(1){
-			int x_rand = rand() % board.Size;
-			int y_rand = rand() % board.Size;
-			if(board.TableScore[y_rand][x_rand] == MaxScore){
-				board.BestMove.x = x_rand;
-				board.BestMove.y = y_rand;
-				break;
-			}
-		}
 		
 		if(TTT::DrawTable(2,board.BestMove.x+1,board.BestMove.y+1))
 			return 1;

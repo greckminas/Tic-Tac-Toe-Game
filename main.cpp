@@ -12,6 +12,7 @@ void GameMaking(int* turn){
 		if(size != 3 && size != 5 && size != 7){
 			printf("Pilih ukuran [3/5/7] = ");
 			scanf_s("%d",&size);
+			std::cin.sync();
 			if(size != 3 && size != 5 && size != 7)
 				continue;
 		} else 
@@ -20,8 +21,8 @@ void GameMaking(int* turn){
 		printf("Lawan Bot? [y/t] = ");
 		
 		char temp_bot;
-		scanf("%c",&temp_bot);
-
+		scanf_s("%c",&temp_bot);
+		std::cin.sync();
 		if(temp_bot == 'y' || temp_bot == 'Y')
 			vs_bot = true;
 		else if(temp_bot != 't' && temp_bot != 'T')
@@ -30,11 +31,13 @@ void GameMaking(int* turn){
 	}
 	
 	printf("Masukkan Nama Player 1 = ");
-	scanf("\n%[^\n]%*c",p1);
+	scanf_s("\n%[^\n]%*c",p1);
+	std::cin.sync();
 	TTT::SetUsername(1,p1);
 	if(!vs_bot){
 		printf("Masukkan Nama Player 2 = ");
-		scanf("\n%[^\n]%*c",p2);
+		scanf_s("\n%[^\n]%*c",p2);
+		std::cin.sync();
 		TTT::SetUsername(2,p2);
 	} else {
 		TTT::SetUsername(2,"Bot");
@@ -45,6 +48,7 @@ void GameMaking(int* turn){
 		printf("Pilih ukuran [3/5/7] = %d\n",size);
 		printf("Siapa giliran pertama ?\n1. %s\n2. %s\n[1/2] = ",TTT::GetUsername(1),TTT::GetUsername(2));
 		scanf_s("%d",turn);
+		std::cin.sync();
 		if(*turn != 1 && *turn != 2)
 			continue;
 		break;
@@ -80,33 +84,52 @@ bool GetInput(int num_player){
 	fflush(stdin);
 
 	if(ConvertInput(&strinput[0],&strinput[1])){
+		if(TTT::GetTimeout()){
+			TTT::DrawRandom(num_player);
+			strcpy_s(errorstr,"Error = Input timeout. Randomize input!\n");
+			return true;
+		}
 		int res_draw = TTT::DrawTable(num_player,strinput[0],strinput[1]);
 		switch(res_draw){ //gambar X atau O di posisi (x,y)
 		case 2:
-			strcpy(errorstr,"Error = Out of Table. Try Again!\n");
+			strcpy_s(errorstr,"Error = Out of Table. Try Again!\n");
 			return false;
 		case 3:
-			strcpy(errorstr,"Error = Table is occupied. Try Again!\n");
+			strcpy_s(errorstr,"Error = Table is occupied. Try Again!\n");
 			return false;
 		}
 	}
 	else {
-		strcpy(errorstr,"Error = Invalid Input. Try Again!\n");
+		strcpy_s(errorstr,"Error = Invalid Input. Try Again!\n");
 		return false;
 	}
 	return true;
 }
 
-bool Wait(int sec){
-	clock_t start = clock();
-	while(clock()-start < sec*1000);
-	return true;
+DWORD WINAPI waitthread(LPVOID){
+	int sec = 0;
+	int prevturn = 0;
+	while(1){
+		
+		Sleep(1000);
+		if(TTT::GetCountTurn() == prevturn)
+			sec++;
+		else
+			sec = 0;
+		
+		prevturn = TTT::GetCountTurn();
+
+		if(sec >= 10)
+			TTT::SetTimeout(true);
+	}
+	return 0;
 }
 
 int main(){
 	int turn = 0;
 	GameMaking(&turn);
 	BOT::initBot();
+	CreateThread(0,0,waitthread,0,0,0);
 	while(1){
 	
 		TTT::PrintGame(); //nampilin tabel
