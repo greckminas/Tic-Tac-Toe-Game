@@ -10,9 +10,10 @@
 5. ~~Get a Winner~~ (21 December 2020)
 6. ~~Create "Turn" function~~ (22 December 2020)
 7. ~~Create Bot Movement~~ (23 December 2020)
-8. Make some difficulties
+8. ~~Make some difficulties~~ (28 December 2020)
 9. ~~Add input timeout~~ (27 December 2020)
-10. Add powerups ?
+10. ~~Get last move information~~ (28 December 2020)
+11. FINAL: Wrap the code!
 
 **(WORK IN PROGRESS)**
 
@@ -42,3 +43,8 @@ psst.. I think bot thinking should has timeout interval.<br />
 27 December 2020<br />
 ![Testing timeout interval](img-progress/27-des-2020-1.png)<br />
 I Created and tested timeout interval. And of course bot movement has timeout interval too.<br />
+
+28 December 2020<br />
+![Testing bot difficulties and last move information](img-progress/28-des-2020-1.png)<br />
+I Created and tested bot difficulties from level 1 to 5. Also tested last move information.<br />
+But, the code is so messy. I have to clean the code and wrap it up.<br />

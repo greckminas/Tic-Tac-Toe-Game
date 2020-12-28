@@ -18,6 +18,7 @@ namespace TTT{
 	void SetTimeout(bool timeout);
 	bool GetTimeout();
 	bool DrawRandom(int num_player);
+	bool SetDifficulty(int level);
 }
 
 namespace BOT{

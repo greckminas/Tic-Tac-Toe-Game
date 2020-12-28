@@ -131,7 +131,6 @@ namespace TTT{
 				printf("- ");					// ----------
 			printf("\n");
 		}
-
 	}
 	int GetWinner(){
 		int Winner = -1; //-1 is equal as draw
@@ -227,14 +226,16 @@ namespace TTT{
 		return 0;
 	}
 	int GetLastMove(int num_player, int* x, int* y){
-		if(!*x || !*y)
-			return 2; //invalid move
 		switch(num_player){
 		case 1:
+			if(!Game.Player1.LastMove.x || !Game.Player1.LastMove.y)
+				return 2;
 			*x = Game.Player1.LastMove.x;
 			*y = Game.Player1.LastMove.y;
 			return 0;
 		case 2:
+			if(!Game.Player2.LastMove.x || !Game.Player2.LastMove.y)
+				return 2;
 			*x = Game.Player2.LastMove.x;
 			*y = Game.Player2.LastMove.y;
 			return 0;
@@ -275,7 +276,13 @@ namespace TTT{
 		}
 		return true;
 	}
+	bool SetDifficulty(int level){
+		if(level <= 0 || level > 5)
+			return false;
 
+		Game.Difficulty = level;
+		return true;
+	}
 }
 
 namespace BOT{
@@ -285,8 +292,6 @@ namespace BOT{
 		int WinLen;
 		int** isEmpty;
 		int** Table;
-		int** TableScore;
-		int** StepTable;
 		int** WinTable;
 		int countEmpty;
 		struct point{
@@ -299,25 +304,19 @@ namespace BOT{
 	void initBot(){
 		int** table = new int*[TTT::Game.Size];
 		int** table1 = new int*[TTT::Game.Size];
-		//int** table2 = new int*[TTT::Game.Size];
-		//int** table3 = new int*[TTT::Game.Size];
-		int** table4 = new int*[TTT::Game.Size];
+		int** table2 = new int*[TTT::Game.Size];
 		for(int i = 0; i < TTT::Game.Size; ++i){
 			table[i] = new int[TTT::Game.Size];
 			table1[i] = new int[TTT::Game.Size];
-			//table2[i] = new int[TTT::Game.Size];
-			//table3[i] = new int[TTT::Game.Size];
-			table4[i] = new int[TTT::Game.Size];
+			table2[i] = new int[TTT::Game.Size];
 		}
 		board.isEmpty = table;
 		board.Table = table1;
-		//board.TableScore = table2;
-		//board.StepTable = table3;
-		board.WinTable = table4;
+		board.WinTable = table2;
 		board.Size = TTT::Game.Size;
 		board.WinLen = TTT::Game.WinLen;
-		
-
+		if(!TTT::Game.Difficulty)
+			TTT::Game.Difficulty = 1;
 	}
 
 	int CheckWinner(BOT::Data board){
@@ -466,9 +465,7 @@ namespace BOT{
 			for(int x = 0; x<board.Size; x++){
 				board.Table[y][x] = TTT::Game.Table[y][x];
 				board.isEmpty[y][x] = 0;
-				//board.TableScore[y][x] = 0;
 				board.WinTable[y][x] = 0;
-				//board.StepTable[y][x] = 0;
 			}
 		}
 		
@@ -482,7 +479,7 @@ namespace BOT{
 				}
 			}
 		}
-		TTT::Game.Difficulty = 4;
+	
 		GetBestMove(board,2,1);
 			
 		srand((unsigned int)time(NULL));

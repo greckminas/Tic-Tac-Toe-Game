@@ -2,6 +2,7 @@
 
 void GameMaking(int* turn){
 	bool vs_bot = false;
+	int level = 0;
 	int size = 0;
 	char p1[255] = {};
 	char p2[255] = {};
@@ -46,14 +47,28 @@ void GameMaking(int* turn){
 		system("cls");
 		printf("Selamat Datang di Tic Tac Toe Game Sederhana!\n");
 		printf("Pilih ukuran [3/5/7] = %d\n",size);
-		printf("Siapa giliran pertama ?\n1. %s\n2. %s\n[1/2] = ",TTT::GetUsername(1),TTT::GetUsername(2));
-		scanf_s("%d",turn);
-		std::cin.sync();
-		if(*turn != 1 && *turn != 2)
-			continue;
+		if(*turn != 1 && *turn != 2){
+			printf("Siapa giliran pertama ?\n1. %s\n2. %s\n[1/2] = ",TTT::GetUsername(1),TTT::GetUsername(2));
+			scanf_s("%d",turn);
+			std::cin.sync();
+			if(*turn != 1 && *turn != 2)
+				continue;
+		}
+		else 
+			printf("Giliran pertama = %d. %s\n",*turn,TTT::GetUsername(*turn));
+
+		if((level < 1 || level > 5) && vs_bot){
+			printf("Tentukan tingkat kesulitan [1-5] = ");
+			scanf_s("%d",&level);
+			std::cin.sync();
+			if(level < 1 || level > 5)
+				continue;
+		}
+
 		break;
 
 	}
+	TTT::SetDifficulty(level);
 	fflush(stdin);
 	TTT::CreateGame(size,vs_bot); //buat tabel, dan ukurannya
 }
@@ -106,7 +121,7 @@ bool GetInput(int num_player){
 	return true;
 }
 
-DWORD WINAPI waitthread(LPVOID){
+DWORD WINAPI timerthread(LPVOID){
 	int sec = 0;
 	int prevturn = 0;
 	while(1){
@@ -127,12 +142,16 @@ DWORD WINAPI waitthread(LPVOID){
 
 int main(){
 	int turn = 0;
+	int x = 0, y = 0;
 	GameMaking(&turn);
 	BOT::initBot();
-	CreateThread(0,0,waitthread,0,0,0);
+	CreateThread(0,0,timerthread,0,0,0);
 	while(1){
 	
 		TTT::PrintGame(); //nampilin tabel
+		if(!TTT::GetLastMove((turn==1) ? 2 : 1,&x,&y)){
+			printf("Move terakhir oleh %s pada titik (%d,%c)\n",TTT::GetUsername((turn==1) ? 2 : 1),x,y+'a'-1);
+		}
 				
 		if(turn == 1){
 			if(GetInput(turn))
