@@ -125,7 +125,6 @@ DWORD WINAPI timerthread(LPVOID){
 	int sec = 0;
 	int prevturn = 0;
 	while(1){
-		
 		Sleep(1000);
 		if(TTT::GetCountTurn() == prevturn)
 			sec++;
@@ -140,44 +139,79 @@ DWORD WINAPI timerthread(LPVOID){
 	return 0;
 }
 
-int main(){
-	int turn = 0;
-	int x = 0, y = 0;
-	GameMaking(&turn);
-	BOT::initBot();
-	CreateThread(0,0,timerthread,0,0,0);
+DWORD WINAPI winthread(LPVOID param){
+	int Winner = *(int*)param;
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	int color = 8;
 	while(1){
-	
+		if(++color > 15)
+			color = 9;
+		SetConsoleTextAttribute(hOut,color);
 		TTT::PrintGame(); //nampilin tabel
-		if(!TTT::GetLastMove((turn==1) ? 2 : 1,&x,&y)){
-			printf("Move terakhir oleh %s pada titik (%d,%c)\n",TTT::GetUsername((turn==1) ? 2 : 1),x,y+'a'-1);
-		}
-				
-		if(turn == 1){
-			if(GetInput(turn))
-					turn = 2;
-		}else if(turn == 2){
-			if(TTT::isPlayerBot(2))
-				while(BOT::GetMoveBot());
-			else
-				while(!GetInput(turn));
-			turn = 1;
-		}
-
-		int Winner = TTT::GetWinner();
-		if(Winner){
-			TTT::PrintGame(); //nampilin tabel
 			if(Winner == 3){
 				printf("\nThe game is Draw!\n");
-				system("pause");
+			} else {
+				printf("\nThe Winner is %s!",TTT::GetUsername(Winner));
+			}
+			printf("\nPress ESC to Play Again!");
+			if(GetAsyncKeyState(VK_ESCAPE)){
+				return 0;
+			}
+			Sleep(100);
+	}
+	return 0;
+}
+
+void SetConsole(){
+	SetConsoleTitle("Tic Tac Toe");
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+	cfi.nFont = 0;
+	cfi.dwFontSize.X = 0;
+	cfi.dwFontSize.Y = 20;
+	cfi.FontFamily = FF_DONTCARE;
+	cfi.FontWeight = FW_MEDIUM;
+	*cfi.FaceName = *L"Consolas";
+	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE),false,&cfi);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
+}
+
+int main(){
+	while(1){
+		SetConsole();
+		int turn = 0;
+		int x = 0, y = 0;
+		GameMaking(&turn);
+		BOT::initBot();
+		HANDLE hTimer = CreateThread(0,0,timerthread,0,0,0);
+	
+		while(1){
+	
+			TTT::PrintGame(); //nampilin tabel
+			if(!TTT::GetLastMove((turn==1) ? 2 : 1,&x,&y)){
+				printf("Move terakhir oleh %s pada titik (%d,%c)\n",TTT::GetUsername((turn==1) ? 2 : 1),x,y+'a'-1);
+			}
+				
+			if(turn == 1){
+				if(GetInput(turn))
+						turn = 2;
+			}else if(turn == 2){
+				if(TTT::isPlayerBot(2))
+					while(BOT::GetMoveBot());
+				else
+					while(!GetInput(turn));
+				turn = 1;
+			}
+
+			int Winner = TTT::GetWinner();
+			if(Winner){
+				int* param = new int(Winner);
+			
+				WaitForSingleObject(CreateThread(0,0,winthread,param,0,0),INFINITE);
+				TerminateThread(hTimer,0);
 				break;
 			}
-			printf("\nThe Winner is %s!\n",TTT::GetUsername(Winner));
-			system("pause");
-			break;
 		}
 	}
-	system("pause");
-	system("pause");
 	return 0;
 }

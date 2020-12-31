@@ -18,8 +18,9 @@ namespace TTT{
 		}Player1,Player2;
 		int** Table;
 	};
-
 	Data Game;
+	//ascii code
+	//0xC4 = -
 
 	int CreateGame(int size,bool versus_bot){
 		Game.WinLen = 5;
@@ -105,17 +106,21 @@ namespace TTT{
 		Game.CountTurn++;
 		return 0;
 	}
+
 	void PrintGame(){
 		system("cls");
 		printf("  ");
 		for(int i=1;i<=Game.Size;i++)
 			printf("%d ",i);					//  1 2 3 4 5
-		printf("\n  ");
-		for(int i=1;i<=Game.Size;i++)
-			printf("- ");						// ----------
+
+		printf("\n \xda");
+		for(int i=1;i<=Game.Size-1;i++)
+			printf("\xc4\xc2");
+		printf("\xc4\xbf");
+
 		printf("\n");
 		for(int y = 0;y<Game.Size;y++){
-			printf("%c|",y+'a');
+			printf("%c\xb3",y+'a');
 			for(int x = 0;x<Game.Size;x++){
 				char temp;
 				if(!Game.Table[y][x])
@@ -124,11 +129,13 @@ namespace TTT{
 					temp = 'X';
 				else if(Game.Table[y][x] == 2)
 					temp = 'O';
-				printf("%c|",temp);				//a|X|O|X|O|X|
+				printf("%c\xb3",temp);				//a|X|O|X|O|X|
 			}
-			printf("\n  ");
-			for(int i=1;i<=Game.Size;i++)
-				printf("- ");					// ----------
+
+			printf((y<Game.Size-1) ? "\n \xc3" : "\n \xc0");
+			for(int i=1;i<=Game.Size;i++){
+				printf((i==Game.Size) ? ((y<Game.Size-1) ? "\xc4\xb4" : "\xc4\xd9") : ((y<Game.Size-1) ? "\xc4\xc5" : "\xc4\xc1"));
+			}
 			printf("\n");
 		}
 	}
@@ -318,7 +325,6 @@ namespace BOT{
 		if(!TTT::Game.Difficulty)
 			TTT::Game.Difficulty = 1;
 	}
-
 	int CheckWinner(BOT::Data board){
 		switch(board.Size){
 		case 3:
@@ -401,7 +407,6 @@ namespace BOT{
 		}
 		return 0;
 	}
-	
 	int GetBestMove(BOT::Data &board, int num_player, int steps){
 		
 		for(int y = 0; y<board.Size; y++){
@@ -415,32 +420,12 @@ namespace BOT{
 						int score = steps*board.Size*board.Size;
 						if(!board.WinTable[y][x] || board.WinTable[y][x] > score){
 							board.WinTable[y][x] = score;
-						} else {
-							//board.WinTable[y][x] -= TTT::Game.Difficulty-steps+1;
-						}
+						} 
 					} else {
 						if (steps <= TTT::Game.Difficulty && !TTT::GetTimeout()){
 							int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1); 
 						}
 					}
-
-					//if(Winner==2){
-					//	//board.BestMove.x = x;
-					//	//board.BestMove.y = y;
-					//	board.TableScore[y][x] += 10*(TTT::Game.Difficulty-steps); //menang
-					//	return 2;
-					//}else if(Winner==1){
-					//	//board.BestMove.x = x;
-					//	//board.BestMove.y = y;
-					//	board.TableScore[y][x] += 10*(TTT::Game.Difficulty-steps); //kalah
-					//	//return 1;
-					//} else {
-					//	if (steps < TTT::Game.Difficulty){
-					//		int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1);
-					//		//if(res)
-					//		//	return res;
-					//	}
-					//}
 
 					board.Table[y][x] = 0;
 					board.isEmpty[y][x] = 1;
@@ -449,7 +434,6 @@ namespace BOT{
 		}
 		return 0;
 	}
-
 	int GetMoveBot(){
 		board.BestScore = -1;
 		board.countEmpty = 0;

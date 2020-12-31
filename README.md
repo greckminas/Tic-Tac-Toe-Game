@@ -13,7 +13,8 @@
 8. ~~Make some difficulties~~ (28 December 2020)
 9. ~~Add input timeout~~ (27 December 2020)
 10. ~~Get last move information~~ (28 December 2020)
-11. FINAL: Wrap the code!
+11. ~~FINAL: Wrap the code!~~ (31 December 2020)
+12. Create Documentation about this game.
 
 **(WORK IN PROGRESS)**
 
@@ -48,3 +49,12 @@ I Created and tested timeout interval. And of course bot movement has timeout in
 ![Testing bot difficulties and last move information](img-progress/28-des-2020-1.png)<br />
 I Created and tested bot difficulties from level 1 to 5. Also tested last move information.<br />
 But, the code is so messy. I have to clean the code and wrap it up.<br />
+
+31 December 2020<br />
+![Redesigning the table](img-progress/31-des-2020-1.png)<br />
+I Redesigned the table. Now the table has continuous line.<br />
+I used many ascii code, Here is the list.<br/>
+![Box Drawing ASCII Code](img-progress/ascii-box-drawing.png)<br />
+
+![Creating Winner celebration](img-progress/31-des-2020-2.gif)<br />
+I Created function that celebrating the winner.<br />
