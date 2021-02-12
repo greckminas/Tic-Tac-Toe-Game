@@ -1,5 +1,13 @@
 #include "TicTacGame.h"
 
+/* Membebaskan memory array dua dimensi */
+int FreeMem(int** arr, int size){
+	for(int i = 0; i < size; ++i)
+		free(arr[i]);
+	free(arr);
+	return 0;
+}
+
 namespace TTT{
 	
 	struct Data{
@@ -17,12 +25,12 @@ namespace TTT{
 			}LastMove;
 		}Player1,Player2;
 		int** Table;
-	};
-	Data Game;
-	//ascii code
-	//0xC4 = -
+	}Game={};
 
 	int CreateGame(int size,bool versus_bot){
+		if(Game.Table)
+			FreeMem(Game.Table,Game.Size);
+
 		Game.WinLen = 5;
 		switch(size){
 		case 3:
@@ -53,7 +61,7 @@ namespace TTT{
 		}
 		Game.CountTurn = 0;
 		return 0; //nothing error
-	}
+	} 
 	int SetUsername(int num_player, char* name){
 		switch(num_player){
 		case 1:
@@ -106,21 +114,20 @@ namespace TTT{
 		Game.CountTurn++;
 		return 0;
 	}
-
 	void PrintGame(){
 		system("cls");
 		printf("  ");
 		for(int i=1;i<=Game.Size;i++)
-			printf("%d ",i);					//  1 2 3 4 5
-
+			printf(" %d  ",i);					//  1 2 3 4 5
+		
 		printf("\n \xda");
 		for(int i=1;i<=Game.Size-1;i++)
-			printf("\xc4\xc2");
-		printf("\xc4\xbf");
+			printf("\xc4\xc4\xc4\xc2");
+		printf("\xc4\xc4\xc4\xbf");
 
 		printf("\n");
 		for(int y = 0;y<Game.Size;y++){
-			printf("%c\xb3",y+'a');
+			printf("%c\xb3",y+'a'); //a|
 			for(int x = 0;x<Game.Size;x++){
 				char temp;
 				if(!Game.Table[y][x])
@@ -129,12 +136,12 @@ namespace TTT{
 					temp = 'X';
 				else if(Game.Table[y][x] == 2)
 					temp = 'O';
-				printf("%c\xb3",temp);				//a|X|O|X|O|X|
+				printf(" %c \xb3",temp);				// X | O | X | O | X |
 			}
 
 			printf((y<Game.Size-1) ? "\n \xc3" : "\n \xc0");
 			for(int i=1;i<=Game.Size;i++){
-				printf((i==Game.Size) ? ((y<Game.Size-1) ? "\xc4\xb4" : "\xc4\xd9") : ((y<Game.Size-1) ? "\xc4\xc5" : "\xc4\xc1"));
+				printf((i==Game.Size) ? ((y<Game.Size-1) ? "\xc4\xc4\xc4\xb4" : "\xc4\xc4\xc4\xd9") : ((y<Game.Size-1) ? "\xc4\xc4\xc4\xc5" : "\xc4\xc4\xc4\xc1"));
 			}
 			printf("\n");
 		}
@@ -306,9 +313,15 @@ namespace BOT{
 			int y;
 		}BestMove,move_now;
 		int BestScore;
-	}board;
+	}board={};
 
 	void initBot(){
+		if(board.Table){
+			FreeMem(board.Table,board.Size);
+			FreeMem(board.isEmpty,board.Size);
+			FreeMem(board.WinTable,board.Size);
+		}
+
 		int** table = new int*[TTT::Game.Size];
 		int** table1 = new int*[TTT::Game.Size];
 		int** table2 = new int*[TTT::Game.Size];
@@ -317,6 +330,7 @@ namespace BOT{
 			table1[i] = new int[TTT::Game.Size];
 			table2[i] = new int[TTT::Game.Size];
 		}
+		srand((unsigned int)time(NULL));
 		board.isEmpty = table;
 		board.Table = table1;
 		board.WinTable = table2;
@@ -325,6 +339,7 @@ namespace BOT{
 		if(!TTT::Game.Difficulty)
 			TTT::Game.Difficulty = 1;
 	}
+	/* Cek pemenang */
 	int CheckWinner(BOT::Data board){
 		switch(board.Size){
 		case 3:
@@ -407,6 +422,7 @@ namespace BOT{
 		}
 		return 0;
 	}
+	/* Mendapatkan scoring setiap kotak */
 	int GetBestMove(BOT::Data &board, int num_player, int steps){
 		
 		for(int y = 0; y<board.Size; y++){
@@ -466,7 +482,6 @@ namespace BOT{
 	
 		GetBestMove(board,2,1);
 			
-		srand((unsigned int)time(NULL));
 		int MinScore = 0x7FFFFFFF;
 		for(int y = 0; y<board.Size; y++){
 			for(int x = 0; x<board.Size; x++){
@@ -500,5 +515,66 @@ namespace BOT{
 		return 0;
 
 	}
+}
 
+namespace File{
+	
+	struct Data{
+		char time[100];
+		int Size;
+		int Difficulty;
+		char name[255];
+	};
+
+	int Save(int Winner){
+		FILE* pFile = 0;
+		Data Record;
+
+		time_t _time;
+		struct tm tmi;
+		time (&_time);
+		localtime_s (&tmi,&_time);
+		strftime (Record.time,100,"%d %b %Y %H:%M",&tmi);
+		
+		Record.Size = TTT::Game.Size;
+		Record.Difficulty = TTT::Game.Difficulty;
+		if(Winner == 1)
+			strcpy_s(Record.name, TTT::Game.Player1.name);
+		else if(Winner == 2)
+			strcpy_s(Record.name, TTT::Game.Player2.name);
+
+		fopen_s(&pFile,"Data.dat","ab+"); // append and update binary, can be read
+		if(!pFile)
+			return 1; //fopen error
+
+		fwrite(&Record,sizeof(Data),1,pFile);
+		fclose(pFile);
+		
+		return 0;
+	}
+	int Read(){
+		FILE* pFile = 0;
+		Data Record = {};
+		int i = 1;
+		pFile = fopen("Data.dat","ab+"); // append and update binary, can be read
+		if(!pFile)
+			return 1; //fopen error
+		
+		printf( "\xDA\xC4\xC4\xC2\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC2\xC4\xC4\xC4\xC4\xC4\xC2\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC2\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF\n" );
+		printf( "\xB3%-2s\xB3%-20s\xB3%-5s\xB3%-15s\xB3%-15s\xB3\n", "No", "Time", "Size", "Difficulty", "Winner" );
+		printf( "\xC3\xC4\xC4\xC5\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC5\xC4\xC4\xC4\xC4\xC4\xC5\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC5\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xB4\n" );
+		do{
+			fseek(pFile,(-i)*sizeof(Data),SEEK_END);
+			fread(&Record,sizeof(Record),1,pFile);
+			if(!feof(pFile) && i <= 10){
+				strncpy_s(Record.name, Record.name, 15);
+				printf( "\xB3%-2d\xB3%-20s\xB3%-5d\xB3%-15d\xB3%-15s\xB3\n", i++, Record.time, Record.Size, Record.Difficulty, Record.name );
+			}
+		}while(!feof(pFile) && i <= 10);
+		printf( "\xC0\xC4\xC4\xC1\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC1\xC4\xC4\xC4\xC4\xC4\xC1\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC1\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9\n" );
+		
+		fclose(pFile);
+
+		return 0;
+	}
 }

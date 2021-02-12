@@ -14,7 +14,7 @@
 9. ~~Add input timeout~~ (27 December 2020)
 10. ~~Get last move information~~ (28 December 2020)
 11. ~~FINAL: Wrap the code!~~ (31 December 2020)
-12. Create Documentation about this game.
+12. ~~Create Documentation about this game.~~ (10 February 2021)
 
 **(WORK IN PROGRESS)**
 
@@ -58,3 +58,6 @@ I used many ascii code, Here is the list.<br/>
 
 ![Creating Winner celebration](img-progress/31-des-2020-2.gif)<br />
 I Created function that celebrating the winner.<br />
+
+10 February 2021<br />
+The code has been finalized. And I made the documentation<br />

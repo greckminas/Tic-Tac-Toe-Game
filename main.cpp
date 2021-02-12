@@ -9,7 +9,6 @@ void GameMaking(int* turn){
 
 	while(1){
 		system("cls");
-		printf("Selamat Datang di Tic Tac Toe Game Sederhana!\n");
 		if(size != 3 && size != 5 && size != 7){
 			printf("Pilih ukuran [3/5/7] = ");
 			scanf_s("%d",&size);
@@ -45,7 +44,6 @@ void GameMaking(int* turn){
 	}
 	while(1){
 		system("cls");
-		printf("Selamat Datang di Tic Tac Toe Game Sederhana!\n");
 		printf("Pilih ukuran [3/5/7] = %d\n",size);
 		if(*turn != 1 && *turn != 2){
 			printf("Siapa giliran pertama ?\n1. %s\n2. %s\n[1/2] = ",TTT::GetUsername(1),TTT::GetUsername(2));
@@ -92,7 +90,7 @@ char errorstr[255] = {};
 
 bool GetInput(int num_player){
 	char strinput[2];
-	printf("%sInput untuk %s = ",errorstr,TTT::GetUsername(num_player));
+	printf("Input untuk %s = ",TTT::GetUsername(num_player));
 	errorstr[0] = 0;
 
 	fgets(strinput,3,stdin);
@@ -101,21 +99,21 @@ bool GetInput(int num_player){
 	if(ConvertInput(&strinput[0],&strinput[1])){
 		if(TTT::GetTimeout()){
 			TTT::DrawRandom(num_player);
-			strcpy_s(errorstr,"Error = Input timeout. Randomize input!\n");
+			strcpy_s(errorstr,"Error = Input terlalu lama. Input diacak!\n");
 			return true;
 		}
 		int res_draw = TTT::DrawTable(num_player,strinput[0],strinput[1]);
 		switch(res_draw){ //gambar X atau O di posisi (x,y)
 		case 2:
-			strcpy_s(errorstr,"Error = Out of Table. Try Again!\n");
+			strcpy_s(errorstr,"Error = Diluar papan. Coba lagi!\n");
 			return false;
 		case 3:
-			strcpy_s(errorstr,"Error = Table is occupied. Try Again!\n");
+			strcpy_s(errorstr,"Error = Kotak telah terisi. Coba lagi!\n");
 			return false;
 		}
 	}
 	else {
-		strcpy_s(errorstr,"Error = Invalid Input. Try Again!\n");
+		strcpy_s(errorstr,"Error = Input tidak valid. Coba lagi!\n");
 		return false;
 	}
 	return true;
@@ -147,16 +145,22 @@ DWORD WINAPI winthread(LPVOID param){
 		if(++color > 15)
 			color = 9;
 		SetConsoleTextAttribute(hOut,color);
-		TTT::PrintGame(); //nampilin tabel
+		TTT::PrintGame(); //tampilkan tabel
 			if(Winner == 3){
-				printf("\nThe game is Draw!\n");
+				printf("\nPermainan berakhir Seri!\n");
 			} else {
-				printf("\nThe Winner is %s!",TTT::GetUsername(Winner));
+				printf("\nPemenangnya adalah %s!",TTT::GetUsername(Winner));
 			}
-			printf("\nPress ESC to Play Again!");
-			if(GetAsyncKeyState(VK_ESCAPE)){
+			printf("\nTekan ESC Untuk keluar permainan!\nTekan Spasi untuk kembali ke main menu!");
+			if(GetAsyncKeyState(VK_ESCAPE)&0x8000)
+				exit(0);
+			else if(GetAsyncKeyState(VK_SPACE)&0x8000)
 				return 0;
-			}
+			/*
+				nilai return GetAsyncKeyState()
+				0x8000 = sedang ditekan
+				0x1 = transisi antara dilepas dan ditekan
+			*/
 			Sleep(100);
 	}
 	return 0;
@@ -176,22 +180,104 @@ void SetConsole(){
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),15);
 }
 
+void Scoreboard(){
+	system("cls");
+	printf("Riwayat permainan yang telah menang melawan Bot\n");
+	File::Read();
+	printf("Tekan tombol apapun untuk kembali ke Main Menu\n");
+	_getch();
+}
+
+void HowToPlay(){
+	system("cls");
+	//cara memulai permainan
+	printf( "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF\n" );
+	printf("\xB3%-67s\xB3\n","Cara memulai permainan :");
+	printf("\xB3%-67s\xB3\n","1. Pada main menu, tekan ankga [1] untuk mulai bermain");
+	printf("\xB3%-67s\xB3\n","2. Pilih ukuran papan permainan, ada 3 pilihan yaitu 3, 5, dan 7");
+	printf("\xB3%-67s\xB3\n","3. Tentukan apakah ingin melawan Bot atau tidak");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","3.1. Jika tidak melawan bot, maka anda diharuskan memasukkan nama","     pemain pertama dan kedua");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","3.2. Jika melawan bot, maka anda hanya memasukkan nama pemain","     pertama");
+	printf("\xB3%-67s\xB3\n","4. Tentukan siapa giliran pertamanya");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","5. Jika melawan bot, Tentukan juga tingkat kesulitan dari 1 hingga","   5");
+	printf( "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9\n" );
+	
+	//cara memasukkan bidak
+	printf( "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF\n" );
+	printf("\xB3%-67s\xB3\n","Cara memasukkan bidak :");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","Ketik koordinat x (horizontal) terlebih dahulu dilanjutkan","koordinat y (vertikal) dipisah oleh spasi.");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","Contoh : \"1 b\", berarti kotak yang dipilih adalah kolom pertama","dan baris kedua");
+	printf( "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9\n" );
+	
+	//sistem scoreboard
+	printf( "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF\n" );
+	printf("\xB3%-67s\xB3\n","Sistem Scoreboard :");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","Scoreboard hanya terisi jika pemain telah memenangkan permainan","melawan Bot saja.");
+	printf("\xB3%-67s\xB3\n","Scoreboard hanya menampilkan 10 kemenangan terakhir.");
+	printf( "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9\n" );
+
+	printf( "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF\n" );
+	printf("\xB3%-67s\xB3\n","Tentang Permainan :");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","Permainan ini dibuat dalam bahasa C++ menggunakan compiler", "Microsoft Visual C++ 2010.");
+	printf("\xB3%-67s\xB3\n\xB3%-67s\xB3\n","Permainan ini dibuat oleh Gefi Aulia Sanjaya dan Rangga Yudha", "Yudistira.");
+	printf( "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9\n" );	
+
+	printf("Tekan tombol apapun untuk kembali ke Main Menu\n");
+	_getch();
+}
+
+int MainMenu(){
+	/*
+		1. Play
+		2. Scoreboard
+		3. Help
+	*/
+	while(1){
+		int menu = 0;
+		system("cls");
+		printf("Tic Tac Toe\n");
+		printf("1. Mulai bermain\n2. Sang penakluk\n3. Cara bermain\n4. Keluar permainan\n");
+		printf("[1/2/3/4] = ");
+		scanf_s("%d",&menu);
+		std::cin.sync();
+		if(menu != 1 && menu != 2 && menu != 3 && menu != 4)
+			continue;
+		switch(menu){
+		case 1:
+			return 0; //keluar perulangan dan lanjut bermain
+		case 2:
+			Scoreboard();
+			break;
+		case 3:
+			HowToPlay();
+			break;
+		case 4:
+			exit(0);
+			break;
+		}
+	}
+	return 0;
+}
+
 int main(){
 	while(1){
 		SetConsole();
+		MainMenu();
 		int turn = 0;
 		int x = 0, y = 0;
 		GameMaking(&turn);
 		BOT::initBot();
 		HANDLE hTimer = CreateThread(0,0,timerthread,0,0,0);
-	
+		
 		while(1){
-	
-			TTT::PrintGame(); //nampilin tabel
+			
+			TTT::PrintGame(); //tampilkan tabel
+			printf("%s\n",errorstr);
+			/* Menampilkan gerakan terakhir */
 			if(!TTT::GetLastMove((turn==1) ? 2 : 1,&x,&y)){
 				printf("Move terakhir oleh %s pada titik (%d,%c)\n",TTT::GetUsername((turn==1) ? 2 : 1),x,y+'a'-1);
 			}
-				
+
 			if(turn == 1){
 				if(GetInput(turn))
 						turn = 2;
@@ -205,10 +291,12 @@ int main(){
 
 			int Winner = TTT::GetWinner();
 			if(Winner){
-				int* param = new int(Winner);
-			
-				WaitForSingleObject(CreateThread(0,0,winthread,param,0,0),INFINITE);
 				TerminateThread(hTimer,0);
+				int* param = new int(Winner);
+				if(TTT::isPlayerBot(2) && Winner == 1){
+					File::Save(Winner);
+				}
+				WaitForSingleObject(CreateThread(0,0,winthread,param,0,0),INFINITE);
 				break;
 			}
 		}
