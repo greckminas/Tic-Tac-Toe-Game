@@ -118,7 +118,11 @@ namespace TTT{
 		system("cls");
 		printf("  ");
 		for(int i=1;i<=Game.Size;i++)
+<<<<<<< HEAD
 			printf(" %d  ",i);					//  1 2 3 4 5
+=======
+			printf("%d ",i);					//  1 2 3 4 5
+>>>>>>> b567838a3aa29221db9e8675a187850ba101392c
 		
 		printf("\n \xda");
 		for(int i=1;i<=Game.Size-1;i++)
