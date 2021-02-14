@@ -1,5 +1,17 @@
 # Tic-Tac-Toe-Game
 
+**Cara Menggunakan Program**
+1. Buka Github lalu pada kolom pencarian ketik “greckminas/Tic-Tac-Toe-Game”
+2. Download “TicTacGame.exe” pada folder ‘Release’.
+3. Setelah selesai, buka program dengan cara klik dua kali pada “TicTacGame.exe”.
+4. Program siap dijalankan
+
+**How To Use Program**
+1. Open Github, and then type "greckminas/Tic-Tac-Toe-Game" on search bar.
+2. Download "TicTacGame.exe" on 'Release' folder.
+3. Once it is done, open the program by double-clicking on"TicTacGAme.exe"
+4. The program ready to go.
+
 #### A simple Tic Tac Toe Game program made in c++
 
 **TODO LIST**
