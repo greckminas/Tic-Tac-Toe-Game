@@ -307,7 +307,6 @@ namespace BOT{
 		int** isEmpty;
 		int** Table;
 		int** WinTable;
-		int countEmpty;
 		struct point{
 			int x;
 			int y;
@@ -439,7 +438,8 @@ namespace BOT{
 						} 
 					} else {
 						if (steps <= TTT::Game.Difficulty && !TTT::GetTimeout()){
-							int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1); 
+							if(TTT::GetCountTurn() >= steps )
+								int res = GetBestMove(board,(num_player==1) ? 2 : 1,steps+1); 
 						}
 					}
 
@@ -452,14 +452,6 @@ namespace BOT{
 	}
 	int GetMoveBot(){
 		board.BestScore = -1;
-		board.countEmpty = 0;
-		for(int i = 0; i<board.Size; i++){
-			for(int j = 0; j<board.Size; j++){
-				if(!TTT::Game.Table[j][i]){
-					board.countEmpty++;
-				}
-			}
-		}
 		
 		for(int y = 0; y<board.Size; y++){
 			for(int x = 0; x<board.Size; x++){
@@ -508,7 +500,7 @@ namespace BOT{
 			}
 		}
 		
-		
+		TTT::SetTimeout(false);
 		if(TTT::DrawTable(2,board.BestMove.x+1,board.BestMove.y+1))
 			return 1;
 		//end of CheckMove
